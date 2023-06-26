@@ -151,6 +151,59 @@
             
 
   
+    <article id="post-nfs" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h1 id="PC设置"><a href="#PC设置" class="headerlink" title="PC设置"></a>PC设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-kernel-server</span><br><span class="line">sudo vim /etc/exports</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加如下到exports</span></span><br><span class="line">/path/to/shared/folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)</span><br><span class="line"></span><br><span class="line">sudo service nfs-kernel-server start</span><br></pre></td></tr></table></figure>
+
+<h1 id="Jetson设置"><a href="#Jetson设置" class="headerlink" title="Jetson设置"></a>Jetson设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-common</span><br><span class="line">mkdir /path/to/local/folder</span><br><span class="line"></span><br><span class="line"><span class="comment">///path/to/shared/folder替换为共享文件夹的路径，/path/to/local/folder替换为Jetson设备上用于保存共享文件夹的路径。</span></span><br><span class="line">sudo mount &lt;PC_IP_ADDRESS&gt;:/path/to/shared/folder /path/to/local/folder</span><br></pre></td></tr></table></figure>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2023/06/26/nfs/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-rk3588" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     

@@ -10,15 +10,15 @@
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="PC设置1234567sudo apt-get install nfs-kernel-serversudo vim &#x2F;etc&#x2F;exports&#x2F;&#x2F;添加如下到exports&#x2F;path&#x2F;to&#x2F;shared&#x2F;folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)sudo service nfs-kernel-server start  J">
+  <meta name="description" content="title: NFStags:nfs配置记录">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
 <meta property="og:url" content="https://songyj123.github.io/2023/06/26/nfs/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="PC设置1234567sudo apt-get install nfs-kernel-serversudo vim &#x2F;etc&#x2F;exports&#x2F;&#x2F;添加如下到exports&#x2F;path&#x2F;to&#x2F;shared&#x2F;folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)sudo service nfs-kernel-server start  J">
+<meta property="og:description" content="title: NFStags:nfs配置记录">
 <meta property="og:locale">
-<meta property="article:published_time" content="2023-06-26T06:50:55.077Z">
-<meta property="article:modified_time" content="2023-06-26T06:50:55.077Z">
+<meta property="article:published_time" content="2023-06-26T06:58:44.079Z">
+<meta property="article:modified_time" content="2023-06-26T06:58:44.079Z">
 <meta property="article:author" content="SONGyj">
 <meta name="twitter:card" content="summary">
   
@@ -151,9 +151,12 @@
     
   <div class="article-entry" itemprop="articleBody">
     
-    <h1 id="PC设置"><a href="#PC设置" class="headerlink" title="PC设置"></a>PC设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-kernel-server</span><br><span class="line">sudo vim /etc/exports</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加如下到exports</span></span><br><span class="line">/path/to/shared/folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)</span><br><span class="line"></span><br><span class="line">sudo service nfs-kernel-server start</span><br></pre></td></tr></table></figure>
+    <hr>
+<h2 id="title-NFStags"><a href="#title-NFStags" class="headerlink" title="title: NFStags:"></a>title: NFS<br>tags:</h2><h1 id="nfs配置记录"><a href="#nfs配置记录" class="headerlink" title="nfs配置记录"></a>nfs配置记录</h1><span id="more"></span>
 
-<h1 id="Jetson设置"><a href="#Jetson设置" class="headerlink" title="Jetson设置"></a>Jetson设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-common</span><br><span class="line">mkdir /path/to/local/folder</span><br><span class="line"></span><br><span class="line"><span class="comment">///path/to/shared/folder替换为共享文件夹的路径，/path/to/local/folder替换为Jetson设备上用于保存共享文件夹的路径。</span></span><br><span class="line">sudo mount &lt;PC_IP_ADDRESS&gt;:/path/to/shared/folder /path/to/local/folder</span><br></pre></td></tr></table></figure>
+<h2 id="PC设置"><a href="#PC设置" class="headerlink" title="PC设置"></a>PC设置</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-kernel-server</span><br><span class="line">sudo vim /etc/exports</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加如下到exports</span></span><br><span class="line">/path/to/shared/folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)</span><br><span class="line"></span><br><span class="line">sudo service nfs-kernel-server start</span><br></pre></td></tr></table></figure>
+
+<h2 id="Jetson设置"><a href="#Jetson设置" class="headerlink" title="Jetson设置"></a>Jetson设置</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-common</span><br><span class="line">mkdir /path/to/local/folder</span><br><span class="line"></span><br><span class="line"><span class="comment">///path/to/shared/folder替换为共享文件夹的路径，/path/to/local/folder替换为Jetson设备上用于保存共享文件夹的路径。</span></span><br><span class="line">sudo mount &lt;PC_IP_ADDRESS&gt;:/path/to/shared/folder /path/to/local/folder</span><br></pre></td></tr></table></figure>
 
     
 
@@ -279,7 +282,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PC%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">PC设置</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Jetson%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">Jetson设置</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#title-NFStags"><span class="toc-number">1.</span> <span class="toc-text">title: NFStags:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nfs%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95"><span class="toc-number"></span> <span class="toc-text">nfs配置记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#PC%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">PC设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Jetson%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">Jetson设置</span></a></li></ol>
                     </div>
                 </span>
             </div>

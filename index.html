@@ -156,10 +156,11 @@
     
   <div class="article-entry" itemprop="articleBody">
     
-    <h1 id="PC设置"><a href="#PC设置" class="headerlink" title="PC设置"></a>PC设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-kernel-server</span><br><span class="line">sudo vim /etc/exports</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加如下到exports</span></span><br><span class="line">/path/to/shared/folder    &lt;Jetson_IP_ADDRESS&gt;(rw,sync,no_subtree_check)</span><br><span class="line"></span><br><span class="line">sudo service nfs-kernel-server start</span><br></pre></td></tr></table></figure>
-
-<h1 id="Jetson设置"><a href="#Jetson设置" class="headerlink" title="Jetson设置"></a>Jetson设置</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-common</span><br><span class="line">mkdir /path/to/local/folder</span><br><span class="line"></span><br><span class="line"><span class="comment">///path/to/shared/folder替换为共享文件夹的路径，/path/to/local/folder替换为Jetson设备上用于保存共享文件夹的路径。</span></span><br><span class="line">sudo mount &lt;PC_IP_ADDRESS&gt;:/path/to/shared/folder /path/to/local/folder</span><br></pre></td></tr></table></figure>
-
+    <hr>
+<h2 id="title-NFStags"><a href="#title-NFStags" class="headerlink" title="title: NFStags:"></a>title: NFS<br>tags:</h2><h1 id="nfs配置记录"><a href="#nfs配置记录" class="headerlink" title="nfs配置记录"></a>nfs配置记录</h1>
+    
+    <a class="article-more-a" href="/2023/06/26/nfs/#more">more >></a>
+    
     
 
     

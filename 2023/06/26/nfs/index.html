@@ -18,7 +18,7 @@
 <meta property="og:description" content="nfs配置记录">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-06-26T06:58:44.079Z">
-<meta property="article:modified_time" content="2023-06-26T07:00:19.843Z">
+<meta property="article:modified_time" content="2023-06-27T04:40:24.968Z">
 <meta property="article:author" content="SONGyj">
 <meta name="twitter:card" content="summary">
   
@@ -157,6 +157,12 @@
 
 <h2 id="Jetson设置"><a href="#Jetson设置" class="headerlink" title="Jetson设置"></a>Jetson设置</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nfs-common</span><br><span class="line">mkdir /path/to/local/folder</span><br><span class="line"></span><br><span class="line"><span class="comment">///path/to/shared/folder替换为共享文件夹的路径，/path/to/local/folder替换为Jetson设备上用于保存共享文件夹的路径。</span></span><br><span class="line">sudo mount &lt;PC_IP_ADDRESS&gt;:/path/to/shared/folder /path/to/local/folder</span><br></pre></td></tr></table></figure>
 
+<h2 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h2><p>同样的设置在rockpi5b上使用时出现错误</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rock@rock-5b:~$ sudo mount -t nfs -vvvv 10.42.0.1:/home/songyj/rockpi_nfs /home/rock/songyj/</span><br><span class="line">mount.nfs: <span class="built_in">timeout</span> <span class="built_in">set</span> <span class="keyword">for</span> Tue Jun 27 04:36:41 2023</span><br><span class="line">mount.nfs: trying text-based options <span class="string">&#x27;vers=4.2,addr=10.42.0.1,clientaddr=10.42.0.218&#x27;</span></span><br><span class="line">mount.nfs: mount(2): Permission denied</span><br><span class="line">mount.nfs: access denied by server <span class="keyword">while</span> mounting 10.42.0.1:/home/songyj/rockpi_nfs</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#尝试nfs v3</span></span><br><span class="line">sudo mount -t nfs -o nfsvers=3 10.42.0.1:/home/songyj/rockpi_nfs /home/rock/songyj/</span><br></pre></td></tr></table></figure>
+
     
 
     
@@ -281,7 +287,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#nfs%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">nfs配置记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#PC%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">PC设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Jetson%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">Jetson设置</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#nfs%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">nfs配置记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#PC%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">PC设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Jetson%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">Jetson设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%94%99%E8%AF%AF"><span class="toc-number">1.3.</span> <span class="toc-text">错误</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>

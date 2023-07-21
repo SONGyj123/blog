@@ -260,36 +260,209 @@
     <article id="post-rk3588" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2023/05/25/rk3588/" target="_blank">rk3588</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2023/05/25/rk3588/" class="archive-article-date">
-        <time datetime="2023-05-25T15:32:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-25</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
   <div class="article-entry" itemprop="articleBody">
     
-    <h1 id="rk3588裸机"><a href="#rk3588裸机" class="headerlink" title="rk3588裸机"></a>rk3588裸机</h1>
-    
-    <a class="article-more-a" href="/2023/05/25/rk3588/#more">more >></a>
-    
+    <h1 id="cd-rk系列裸机"><a href="#cd-rk系列裸机" class="headerlink" title="cd ..rk系列裸机"></a>cd ..rk系列裸机</h1><h2 id="1-打包分析"><a href="#1-打包分析" class="headerlink" title="1.打包分析"></a>1.打包分析</h2><p>现在厂商都一套自己的打包软件，按照如hceng讲解的<a target="_blank" rel="noopener" href="https://hceng.cn/2018/08/16/RK3399%E2%80%94%E2%80%94%E8%A3%B8%E6%9C%BA%E5%A4%A7%E5%85%A8/">rk3399</a>来做理论上应该可以，但是我在实验时发现不行，下载之后没有相应的串口显示。</p>
+<p>查看这个<a target="_blank" rel="noopener" href="https://wiki.radxa.com/Rock5/guide/build-u-boot-on-5b">radax build uboot</a>指南之后，我们可以知道：</p>
+<p><img src="https://hackmd.io/_uploads/Hy_QOg8r3.png"></p>
+<p>经过尝试之后，发现只需要idbloader就可以启动，我们继续看这个idbloader是怎么生成的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./tools/mkimage -n rk3588 -T rksd -d ../rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.08.bin:spl/u-boot-spl.bin idbloader.img</span><br></pre></td></tr></table></figure>
+
+<p>在官方提供的sdk中的<strong>mk-uboot.sh</strong>找到上述命令，上面的命令合成了ddr和spl两个文件，spl是用于载入uboot的，我们不需要，所以我们只需要将我们自己的bin文件替换spl文件就可以启动了。</p>
+<p>根据文件我们可以看到其实3399的bootcode可以用<strong>mkimage</strong>来制作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tools/mkimage -n rk3399 -T rksd -d ../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.25.bin idbloader.img</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用uboot启动程序"><a href="#使用uboot启动程序" class="headerlink" title="使用uboot启动程序"></a>使用uboot启动程序</h3><p>直接使用裸机程序出现一个问题：从el3到el2不能成功，即使代码在qemu上面没有问题，只能直接从el3到el1。我感觉可能是没有使用atf的原因，所以想使用uboot来引导，编译的uboot已经包括atf了。</p>
+<p>rk3588的uboot并没有支持网络驱动，所以没法nfs或者tftp加载应用程序，需要将编译的应用程序放在sd卡中，利用其他命令加载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//保证自己的sd卡是fat格式</span><br><span class="line">//fatload &lt;interface&gt; &lt;device&gt; &lt;load_addr&gt; &lt;filename&gt;</span><br><span class="line">//mmc 表示sd卡或者是emmc 我的机器上1是sd卡 0x8300000是加载到内核的地址</span><br><span class="line">fatload mmc 1 0x8300000 rk3588.bin</span><br><span class="line"></span><br><span class="line">//跳转到0x8300000运行</span><br><span class="line">go 0x8300000</span><br></pre></td></tr></table></figure>
+
+<p>使用uboot引导之后可以正常下降到el1,但是出现了下降到el1之后，data段被清零了，最开始是在el1使用printf()不能打印全局变量会进入trap，但是在el2使用printf()一切正常，最后定位到data段在进入el1之后清零了。目前不清楚是什么原因导致的，可能el2到el1还有一些特殊操作。我最后用了一个trick：在el2的时候将程序重定位到新的位置，数据段的问题解决了但是暂时不清楚还有没有什么其他的bug。</p>
+<p>X开头的是64bits的寄存器 W开头的是32bits寄存器一定要区分开 <strong>rk3588上的外设基本上都是32bit的 不能用X寄存器去写</strong></p>
+<h2 id="qemu-virt开发板帮助验证程序"><a href="#qemu-virt开发板帮助验证程序" class="headerlink" title="qemu virt开发板帮助验证程序"></a>qemu virt开发板帮助验证程序</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> MemMapEntry base_memmap[] = &#123;</span><br><span class="line">    <span class="comment">/* Space up to 0x8000000 is reserved for a boot ROM */</span></span><br><span class="line">    [VIRT_FLASH] =              &#123;          <span class="number">0</span>, <span class="number">0x08000000</span> &#125;,</span><br><span class="line">    [VIRT_CPUPERIPHS] =         &#123; <span class="number">0x08000000</span>, <span class="number">0x00020000</span> &#125;,</span><br><span class="line">    <span class="comment">/* GIC distributor and CPU interfaces sit inside the CPU peripheral space */</span></span><br><span class="line">    [VIRT_GIC_DIST] =           &#123; <span class="number">0x08000000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    [VIRT_GIC_CPU] =            &#123; <span class="number">0x08010000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    [VIRT_GIC_V2M] =            &#123; <span class="number">0x08020000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_GIC_HYP] =            &#123; <span class="number">0x08030000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    [VIRT_GIC_VCPU] =           &#123; <span class="number">0x08040000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    <span class="comment">/* The space in between here is reserved for GICv3 CPU/vCPU/HYP */</span></span><br><span class="line">    [VIRT_GIC_ITS] =            &#123; <span class="number">0x08080000</span>, <span class="number">0x00020000</span> &#125;,</span><br><span class="line">    <span class="comment">/* This redistributor space allows up to 2*64kB*123 CPUs */</span></span><br><span class="line">    [VIRT_GIC_REDIST] =         &#123; <span class="number">0x080A0000</span>, <span class="number">0x00F60000</span> &#125;,</span><br><span class="line">    [VIRT_UART] =               &#123; <span class="number">0x09000000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_RTC] =                &#123; <span class="number">0x09010000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_FW_CFG] =             &#123; <span class="number">0x09020000</span>, <span class="number">0x00000018</span> &#125;,</span><br><span class="line">    [VIRT_GPIO] =               &#123; <span class="number">0x09030000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_SECURE_UART] =        &#123; <span class="number">0x09040000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_SMMU] =               &#123; <span class="number">0x09050000</span>, <span class="number">0x00020000</span> &#125;,</span><br><span class="line">    [VIRT_PCDIMM_ACPI] =        &#123; <span class="number">0x09070000</span>, MEMORY_HOTPLUG_IO_LEN &#125;,</span><br><span class="line">    [VIRT_ACPI_GED] =           &#123; <span class="number">0x09080000</span>, ACPI_GED_EVT_SEL_LEN &#125;,</span><br><span class="line">    [VIRT_NVDIMM_ACPI] =        &#123; <span class="number">0x09090000</span>, NVDIMM_ACPI_IO_LEN&#125;,</span><br><span class="line">    [VIRT_PVTIME] =             &#123; <span class="number">0x090a0000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    [VIRT_SECURE_GPIO] =        &#123; <span class="number">0x090b0000</span>, <span class="number">0x00001000</span> &#125;,</span><br><span class="line">    [VIRT_MMIO] =               &#123; <span class="number">0x0a000000</span>, <span class="number">0x00000200</span> &#125;,</span><br><span class="line">    <span class="comment">/* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */</span></span><br><span class="line">    [VIRT_PLATFORM_BUS] =       &#123; <span class="number">0x0c000000</span>, <span class="number">0x02000000</span> &#125;,</span><br><span class="line">    [VIRT_SECURE_MEM] =         &#123; <span class="number">0x0e000000</span>, <span class="number">0x01000000</span> &#125;,</span><br><span class="line">    [VIRT_PCIE_MMIO] =          &#123; <span class="number">0x10000000</span>, <span class="number">0x2eff0000</span> &#125;,</span><br><span class="line">    [VIRT_PCIE_PIO] =           &#123; <span class="number">0x3eff0000</span>, <span class="number">0x00010000</span> &#125;,</span><br><span class="line">    [VIRT_PCIE_ECAM] =          &#123; <span class="number">0x3f000000</span>, <span class="number">0x01000000</span> &#125;,</span><br><span class="line">    <span class="comment">/* Actual RAM size depends on initial RAM and device memory settings */</span></span><br><span class="line">    [VIRT_MEM] =                &#123; GiB, LEGACY_RAMLIMIT_BYTES &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="奇怪的错误"><a href="#奇怪的错误" class="headerlink" title="奇怪的错误"></a>奇怪的错误</h2><ol>
+<li>freestanding的printf不知道什么时候开始，使用就报错，最后发现是在可变参函数的入栈出了错误<strong>esr&#x3D;0x1fe00000</strong>，未知错误，检查了sp的对齐没有问题不知道怎么回事，也不是没有isb的问题。最后在<a target="_blank" rel="noopener" href="https://forum.osdev.org/viewtopic.php?f=1&t=56542">osdev</a>上发现了和我一样的问题</li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFLAGS += -mgeneral-regs-only</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><input disabled="" type="checkbox"> bootcode指南的代码尝试不对</li>
+</ul>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>异常处理函数的参数不对会导致错误</p>
+<h2 id="3-1-ARMv8"><a href="#3-1-ARMv8" class="headerlink" title="3.1 ARMv8"></a>3.1 ARMv8</h2><h3 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h3><table>
+<thead>
+<tr>
+<th align="left">EL 1</th>
+<th align="left">作用</th>
+<th align="left">EL 2</th>
+<th align="left">作用</th>
+<th align="left">EL 3</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Text</td>
+<td align="left">Text</td>
+<td align="left">HCR_EL2</td>
+<td align="left">hypervisor conf</td>
+<td align="left">SCR_EL3</td>
+<td align="left">secure conf</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">SCTLR_EL2</td>
+<td align="left">system ctrl</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">SPSR_EL</td>
+<td align="left">Saved Program Status</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><table>
+<thead>
+<tr>
+<th align="left">特权模式</th>
+<th align="left">Column 2</th>
+<th align="left">系统调用指令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">EL0</td>
+<td align="left">应用程序</td>
+<td align="left">SVC</td>
+</tr>
+<tr>
+<td align="left">EL1</td>
+<td align="left">操作系统</td>
+<td align="left">HVC</td>
+</tr>
+<tr>
+<td align="left">EL2</td>
+<td align="left">hypervisor 虚拟化</td>
+<td align="left">SMC</td>
+</tr>
+<tr>
+<td align="left">EL3</td>
+<td align="left">secure monitor 安全世界</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>读取current_el返回值对应exception level的关系：<br><img src="https://hackmd.io/_uploads/S1TtV2mS3.png"></p>
+<p>最开始一直搞不清armv8的sp sp_el0 sp_elx，sp_sel的bit0决定当前使用的是spel0还是spelx</p>
+<p><img src="https://hackmd.io/_uploads/BJO8KNAr3.png"></p>
+<p>在物理上sp寄存器有4g</p>
+<h2 id="2-GIC-500-GIC-600"><a href="#2-GIC-500-GIC-600" class="headerlink" title="2. GIC-500 GIC-600"></a>2. GIC-500 GIC-600</h2><p>rk3399使用gic500，rk3588使用gic600。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//rk3588s.dtsi</span></span><br><span class="line">gic: interrupt-controller@fe600000 &#123;</span><br><span class="line">    compatible = <span class="string">&quot;arm,gic-v3&quot;</span>;</span><br><span class="line">    <span class="meta">#interrupt-cells = <span class="string">&lt;3&gt;</span>; </span></span><br><span class="line">    <span class="meta">#address-cells = <span class="string">&lt;2&gt;</span>; </span></span><br><span class="line">    <span class="meta">#size-cells = <span class="string">&lt;2&gt;</span>; </span></span><br><span class="line">    ranges;</span><br><span class="line">    interrupt-controller;</span><br><span class="line"></span><br><span class="line">    reg = &lt;<span class="number">0x0</span> <span class="number">0xfe600000</span> <span class="number">0</span> <span class="number">0x10000</span>&gt;, <span class="comment">/* GICD */</span></span><br><span class="line">          &lt;<span class="number">0x0</span> <span class="number">0xfe680000</span> <span class="number">0</span> <span class="number">0x100000</span>&gt;; <span class="comment">/* GICR */</span></span><br><span class="line">    interrupts = &lt;GIC_PPI <span class="number">9</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">    its0: msi-controller@fe640000 &#123;</span><br><span class="line">        compatible = <span class="string">&quot;arm,gic-v3-its&quot;</span>;</span><br><span class="line">        msi-controller;</span><br><span class="line">        <span class="meta">#msi-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">        reg = &lt;<span class="number">0x0</span> <span class="number">0xfe640000</span> <span class="number">0x0</span> <span class="number">0x20000</span>&gt;;</span><br><span class="line">    &#125;;</span><br><span class="line">    its1: msi-controller@fe660000 &#123;</span><br><span class="line">        compatible = <span class="string">&quot;arm,gic-v3-its&quot;</span>;</span><br><span class="line">        msi-controller;</span><br><span class="line">        <span class="meta">#msi-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">        reg = &lt;<span class="number">0x0</span> <span class="number">0xfe660000</span> <span class="number">0x0</span> <span class="number">0x20000</span>&gt;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;  </span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="1-中断类型"><a href="#1-中断类型" class="headerlink" title="1. 中断类型"></a>1. 中断类型</h3><ul>
+<li><strong>SPI (Shared Peripheral Interrupt)</strong></li>
+</ul>
+<p>共享的外设中断，每一个SPI都可以被route到一个核心，比如uart</p>
+<ul>
+<li><strong>PPI (Private Peripheral Interrupt)</strong></li>
+</ul>
+<p>每个核心私有的外设中断，比如cortex-a53上的PS定时器等</p>
+<ul>
+<li><strong>SGI (Software Generated Interrupt)</strong></li>
+</ul>
+<p>主要用于核间通信</p>
+<ul>
+<li><strong>LPI (Locality-specific Peripheral Interrupt)</strong></li>
+</ul>
+<p>用于PCIe？</p>
+<h3 id="2-GIC结构"><a href="#2-GIC结构" class="headerlink" title="2. GIC结构"></a>2. GIC结构</h3><p><img src="/home/songyj/pics/gic_struct.png" alt="GIC struct"></p>
+<ul>
+<li><strong>Distributor</strong></li>
+</ul>
+<p>主管<strong>SPI</strong>和<strong>secure</strong></p>
+<p>一个<strong>SoC</strong>只有一个<strong>Distributor</strong>进行一些全局设置，主要和<strong>SPI</strong>相关，所有的核心共用的外设如果发出了中断请求，这个中断请求根据具体情况被发送到指定的核心，从这个结构图上来看也只有<strong>Distributor</strong>可以完成这个任务，因为是全局设置所以还有一些<strong>secure</strong>相关的设置也在这里。</p>
+<p>设置个</p>
+<ul>
+<li><strong>Redistributor</strong></li>
+</ul>
+<p>主管<strong>PPI</strong>和<strong>SGI</strong></p>
+<p>每个核心都有对应的<strong>Redistributor</strong>，在这里设置私有中断应该是比较合适的</p>
+<ul>
+<li><strong>CPU Interface</strong></li>
+</ul>
+<p>主管<strong>priority</strong></p>
+<p>上面两块的设置都不涉及到中断优先级</p>
+<h3 id="3-初始化GIC"><a href="#3-初始化GIC" class="headerlink" title="3. 初始化GIC"></a>3. 初始化GIC</h3><p>mpidr_el1对应aff编号（read only）</p>
+<ol>
+<li><p>初始化<strong>Distributor</strong></p>
+</li>
+<li><p>初始化<strong>Redistributor</strong></p>
+</li>
+<li><p>初始化<strong>CPU</strong></p>
+</li>
+</ol>
+<h2 id="3-中断处理"><a href="#3-中断处理" class="headerlink" title="3. 中断处理"></a>3. 中断处理</h2><p>中断属于异步异常(<strong>asynchronous exception</strong>)，在Armv8架构中，进入异常之后会将<strong>中断屏蔽DAIF</strong>全部置0，如果要使能<strong>中断嵌套</strong>需要在读取<strong>intid</strong>之后手动清楚DAIF屏蔽位</p>
+<p>进入Handler()之后：</p>
+<ol>
+<li>读取<strong>ICC_IAR1_EL1</strong>寄存器 获取对应的中断号</li>
+<li>写中断号到<strong>ICC_EOIR1_EL1</strong> 清除相应的中断标志位</li>
+<li>重新打开DAIF</li>
+</ol>
+<h3 id="1-PPI-定时器-SPI-UART"><a href="#1-PPI-定时器-SPI-UART" class="headerlink" title="1. PPI(定时器) SPI(UART)"></a>1. PPI(定时器) SPI(UART)</h3><p>问题：uart中断使能接收中断之后，使用键盘给rk3588发送字符导致程序暂停，最开始以为是进入到其他的中断处去了，最后发现是与UART的状态位冲突，卡死在uart_send_char()的while循环中，在发送标志位检测中添加超时机制，解决。</p>
+<h2 id="4-MMU"><a href="#4-MMU" class="headerlink" title="4. MMU"></a>4. MMU</h2><p>rk3588的trm中提到有两个MMU600实例，但是这并不是用来操作普通内存地址的，其中一个链接到pcie高速外设另一个php链接到sata usb3等。普通的操作地址使用cortex a核心内部的MMU。</p>
+<p><strong>TCR</strong></p>
+<p><strong>TTBR0_EL1</strong> 存放pagetable的地址</p>
+<p><strong>TTBR1_EL1</strong> 存放pagetable的地址</p>
+<p>有两个页表基址寄存器那么转换的时候用那一个呢？</p>
+<p>虚拟地址VA在**(0x00, 0x0000FFFFFFFFFFFF)<strong>使用</strong>TTBR0_EL1**</p>
+<p>虚拟地址VA在**(0xFFFF000000000000, 0xFFFFFFFFFFFFFFFF)<strong>使用</strong>TTBR1_EL1**</p>
+<h2 id="5-更多"><a href="#5-更多" class="headerlink" title="5. 更多"></a>5. 更多</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#使用find工具查找可能的文件</span></span><br><span class="line">find /home/user/documents -<span class="built_in">type</span> f -name <span class="string">&quot;*.txt&quot;</span></span><br></pre></td></tr></table></figure>
+
+
     
 
     
@@ -304,7 +477,7 @@
 
     
     <p class="article-more-link">
-      <a class="article-more-a" href="/2023/05/25/rk3588/">展开全文 >></a>
+      <a class="article-more-a" href="/2023/06/07/rk3588/">展开全文 >></a>
     </p>
     
 

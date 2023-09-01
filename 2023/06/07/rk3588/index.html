@@ -18,13 +18,17 @@
 <meta property="og:description" content="rk系列裸机">
 <meta property="og:locale">
 <meta property="og:image" content="https://hackmd.io/_uploads/Hy_QOg8r3.png">
+<meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/armv8_special_regs.png">
+<meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/armv8_special_regs1.png">
 <meta property="og:image" content="https://songyj123.github.io/">
 <meta property="og:image" content="https://songyj123.github.io/">
+<meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/exception_change.png">
 <meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/gic_struct.png">
 <meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/armv8_mmu.png">
 <meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/ESR.png">
+<meta property="og:image" content="https://songyj123.github.io/home/songyj/pics/xv6_user_space.png">
 <meta property="article:published_time" content="2023-06-07T04:45:30.299Z">
-<meta property="article:modified_time" content="2023-08-10T03:26:11.012Z">
+<meta property="article:modified_time" content="2023-09-01T08:08:09.411Z">
 <meta property="article:author" content="SONGyj">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://hackmd.io/_uploads/Hy_QOg8r3.png">
@@ -187,82 +191,11 @@
 <li><input disabled="" type="checkbox"> bootcode指南的代码尝试不对</li>
 </ul>
 <h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>异常处理函数的参数不对会导致错误</p>
-<h2 id="3-1-ARMv8"><a href="#3-1-ARMv8" class="headerlink" title="3.1 ARMv8"></a>3.1 ARMv8</h2><h3 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h3><table>
-<thead>
-<tr>
-<th align="left">EL 1</th>
-<th align="left">作用</th>
-<th align="left">EL 2</th>
-<th align="left">作用</th>
-<th align="left">EL 3</th>
-<th align="left">作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Text</td>
-<td align="left">Text</td>
-<td align="left">HCR_EL2</td>
-<td align="left">hypervisor conf</td>
-<td align="left">SCR_EL3</td>
-<td align="left">secure conf</td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left">SCTLR_EL2</td>
-<td align="left">system ctrl</td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">SPSR_EL</td>
-<td align="left">Saved Program Status</td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-</tbody></table>
+<h2 id="2-ARMv8"><a href="#2-ARMv8" class="headerlink" title="2. ARMv8"></a>2. ARMv8</h2><h3 id="SPECIAL-寄存器"><a href="#SPECIAL-寄存器" class="headerlink" title="SPECIAL 寄存器"></a>SPECIAL 寄存器</h3><p><img src="/home/songyj/pics/armv8_special_regs.png"></p>
+<p><img src="/home/songyj/pics/armv8_special_regs1.png"></p>
+<h4 id="SPSR-ELx-Saved-Process-Status-Register"><a href="#SPSR-ELx-Saved-Process-Status-Register" class="headerlink" title="SPSR_ELx (Saved Process Status Register)"></a>SPSR_ELx (Saved Process Status Register)</h4><p><strong>SPSR_ELx</strong>寄存器在异常发生时会复制<strong>PSTATE</strong>值，以便在退出异常时恢复。<strong>PSTATE</strong>包括计算标志位（例如溢出，进位等），中断屏蔽位（DAIF），执行状态（aarch64 aarch32），异常出现时运行在异常等级（EL0 EL1 EL2 EL3），使用哪一个<strong>SP</strong>寄存器（sp_el0 sp_elx）。</p>
+<h4 id="ELR-ELx-Exception-Link-Register"><a href="#ELR-ELx-Exception-Link-Register" class="headerlink" title="ELR_ELx (Exception Link Register)"></a>ELR_ELx (Exception Link Register)</h4><p>异常处理完毕的返回地址。</p>
+<h4 id="SP-ELx-Stack-pointer"><a href="#SP-ELx-Stack-pointer" class="headerlink" title="SP_ELx (Stack pointer)"></a>SP_ELx (Stack pointer)</h4><p>每个异常等级都有对应的SP寄存器，高级别的寄存器都可以使用SP_EL0，需要用户在程序中选择，默认使用SP_ELx。</p>
 <h3 id="armv8汇编"><a href="#armv8汇编" class="headerlink" title="armv8汇编"></a>armv8汇编</h3><h4 id="1-栈操作"><a href="#1-栈操作" class="headerlink" title="1. 栈操作"></a>1. <a target="_blank" rel="noopener" href="https://thinkingeek.com/2017/05/29/exploring-aarch64-assembler-chapter-8/">栈操作</a></h4><p>sp的值不会自己加减，需要手动维护，写c时汇编会汇编出sp操作</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// x8入栈</span><br><span class="line">str x8, [sp, #-8]!  // *(sp - 8) ← x8</span><br><span class="line">                    // sp ← sp - 8</span><br><span class="line">                    </span><br><span class="line">str x8, [sp, #-8]	//有无感叹号的区别就在于 入栈之后对SP进行操作与否                    </span><br></pre></td></tr></table></figure>
 
@@ -277,7 +210,7 @@
 <p>adr&#x2F;adrp加载的是当前程序实际运行的物理地址 adr+-4k adrp+-4G</p>
 <p>adrp指令获取label所在的page的起始地址</p>
 <h4 id="3-跳转"><a href="#3-跳转" class="headerlink" title="3. 跳转"></a>3. 跳转</h4><p>跳转以前没怎么注意，但是跳转是有范围的，在启用了虚拟地址之后如果还是使用<strong>bl b</strong>的话，他们都是<strong>pc-related</strong>所以跳转范围其实只有**+-128m<strong>，需要使用绝对跳转</strong>br**</p>
-<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><table>
+<h2 id="3-异常处理"><a href="#3-异常处理" class="headerlink" title="3. 异常处理"></a>3. 异常处理</h2><table>
 <thead>
 <tr>
 <th align="left">特权模式</th>
@@ -310,6 +243,22 @@
 <p>最开始一直搞不清armv8的sp sp_el0 sp_elx，sp_sel的bit0决定当前使用的是spel0还是spelx</p>
 <p><img src="/"></p>
 <p>在物理上sp寄存器有4g</p>
+<p><img src="/home/songyj/pics/exception_change.png"></p>
+<p>通过ARM提供的异常处理流程图可以看出，在异常发生之后，从异常处理的<strong>entry</strong>代码开始就已经进入到同等级或者更高等级的exception level中了，所以在异常处理代码中使用的SP就是和之前不同的SP</p>
+<h3 id="1-异常返回"><a href="#1-异常返回" class="headerlink" title="1. 异常返回"></a>1. 异常返回</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/*执行eret完成异常的返回*/</span><br><span class="line">eret</span><br></pre></td></tr></table></figure>
+
+<p>执行<strong>eret</strong>时会拷贝<strong>SPSR_ELn</strong>中的状态到<strong>PSTATE</strong>中去，之后程序就开始从<strong>ELR_ELn</strong>中装载的地址运行。</p>
+<p>注意：异常的进入保存和退出恢复的顺序很重要 仔细检查 <strong>stp ldp指令基址的加减顺序</strong></p>
+<h3 id="2-中断处理"><a href="#2-中断处理" class="headerlink" title="2. 中断处理"></a>2. 中断处理</h3><p>中断属于异步异常(<strong>asynchronous exception</strong>)，在Armv8架构中，进入异常之后会将<strong>中断屏蔽DAIF</strong>全部置0，如果要使能<strong>中断嵌套</strong>需要在读取<strong>intid</strong>之后手动清楚DAIF屏蔽位</p>
+<p>进入Handler()之后：</p>
+<ol>
+<li>读取<strong>ICC_IAR1_EL1</strong>寄存器 获取对应的中断号</li>
+<li>写中断号到<strong>ICC_EOIR1_EL1</strong> 清除相应的中断标志位</li>
+<li>重新打开DAIF</li>
+</ol>
+<h4 id="1-PPI-定时器-SPI-UART"><a href="#1-PPI-定时器-SPI-UART" class="headerlink" title="1. PPI(定时器) SPI(UART)"></a>1. PPI(定时器) SPI(UART)</h4><p>问题：uart中断使能接收中断之后，使用键盘给rk3588发送字符导致程序暂停，最开始以为是进入到其他的中断处去了，最后发现是与UART的状态位冲突，卡死在uart_send_char()的while循环中，在发送标志位检测中添加超时机制，解决。</p>
+<p>esr &#x3D; 0x96000046 stp一般是是使用了空指针 或者是操作了没有mmu映射的内存。</p>
+<p>esr &#x3D; 0x96000047 ldp</p>
 <h2 id="2-GIC-500-GIC-600"><a href="#2-GIC-500-GIC-600" class="headerlink" title="2. GIC-500 GIC-600"></a>2. GIC-500 GIC-600</h2><p>rk3399使用gic500，rk3588使用gic600。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//rk3588s.dtsi</span></span><br><span class="line">gic: interrupt-controller@fe600000 &#123;</span><br><span class="line">    compatible = <span class="string">&quot;arm,gic-v3&quot;</span>;</span><br><span class="line">    <span class="meta">#interrupt-cells = <span class="string">&lt;3&gt;</span>; </span></span><br><span class="line">    <span class="meta">#address-cells = <span class="string">&lt;2&gt;</span>; </span></span><br><span class="line">    <span class="meta">#size-cells = <span class="string">&lt;2&gt;</span>; </span></span><br><span class="line">    ranges;</span><br><span class="line">    interrupt-controller;</span><br><span class="line"></span><br><span class="line">    reg = &lt;<span class="number">0x0</span> <span class="number">0xfe600000</span> <span class="number">0</span> <span class="number">0x10000</span>&gt;, <span class="comment">/* GICD */</span></span><br><span class="line">          &lt;<span class="number">0x0</span> <span class="number">0xfe680000</span> <span class="number">0</span> <span class="number">0x100000</span>&gt;; <span class="comment">/* GICR */</span></span><br><span class="line">    interrupts = &lt;GIC_PPI <span class="number">9</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">    its0: msi-controller@fe640000 &#123;</span><br><span class="line">        compatible = <span class="string">&quot;arm,gic-v3-its&quot;</span>;</span><br><span class="line">        msi-controller;</span><br><span class="line">        <span class="meta">#msi-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">        reg = &lt;<span class="number">0x0</span> <span class="number">0xfe640000</span> <span class="number">0x0</span> <span class="number">0x20000</span>&gt;;</span><br><span class="line">    &#125;;</span><br><span class="line">    its1: msi-controller@fe660000 &#123;</span><br><span class="line">        compatible = <span class="string">&quot;arm,gic-v3-its&quot;</span>;</span><br><span class="line">        msi-controller;</span><br><span class="line">        <span class="meta">#msi-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">        reg = &lt;<span class="number">0x0</span> <span class="number">0xfe660000</span> <span class="number">0x0</span> <span class="number">0x20000</span>&gt;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;  </span><br></pre></td></tr></table></figure>
 
@@ -357,17 +306,7 @@
 <li><p>初始化<strong>CPU</strong></p>
 </li>
 </ol>
-<h2 id="3-中断处理"><a href="#3-中断处理" class="headerlink" title="3. 中断处理"></a>3. 中断处理</h2><p>中断属于异步异常(<strong>asynchronous exception</strong>)，在Armv8架构中，进入异常之后会将<strong>中断屏蔽DAIF</strong>全部置0，如果要使能<strong>中断嵌套</strong>需要在读取<strong>intid</strong>之后手动清楚DAIF屏蔽位</p>
-<p>进入Handler()之后：</p>
-<ol>
-<li>读取<strong>ICC_IAR1_EL1</strong>寄存器 获取对应的中断号</li>
-<li>写中断号到<strong>ICC_EOIR1_EL1</strong> 清除相应的中断标志位</li>
-<li>重新打开DAIF</li>
-</ol>
-<h3 id="1-PPI-定时器-SPI-UART"><a href="#1-PPI-定时器-SPI-UART" class="headerlink" title="1. PPI(定时器) SPI(UART)"></a>1. PPI(定时器) SPI(UART)</h3><p>问题：uart中断使能接收中断之后，使用键盘给rk3588发送字符导致程序暂停，最开始以为是进入到其他的中断处去了，最后发现是与UART的状态位冲突，卡死在uart_send_char()的while循环中，在发送标志位检测中添加超时机制，解决。</p>
-<p>esr &#x3D; 0x96000046 stp一般是是使用了空指针 或者是操作了没有mmu映射的内存。</p>
-<p>esr &#x3D; 0x96000047 ldp</p>
-<h2 id="4-MMU"><a href="#4-MMU" class="headerlink" title="4. MMU"></a>4. MMU</h2><h4 id="1-MMU基本"><a href="#1-MMU基本" class="headerlink" title="1. MMU基本"></a>1. MMU基本</h4><p>rk3588的trm中提到有两个MMU600实例，但是这并不是用来操作普通内存地址的，其中一个链接到pcie高速外设另一个php链接到sata usb3等。普通的操作地址使用cortex a核心内部的MMU。</p>
+<h2 id="4-内核空间用户空间的映射"><a href="#4-内核空间用户空间的映射" class="headerlink" title="4. 内核空间用户空间的映射"></a>4. 内核空间用户空间的映射</h2><h3 id="1-MMU基本"><a href="#1-MMU基本" class="headerlink" title="1. MMU基本"></a>1. MMU基本</h3><p>rk3588的trm中提到有两个MMU600实例，但是这并不是用来操作普通内存地址的，其中一个链接到pcie高速外设另一个php链接到sata usb3等。普通的操作地址使用cortex a核心内部的MMU。</p>
 <ul>
 <li><strong>TCR_EL1</strong> 页表设置 4k 16k 64k 48位 39位等 </li>
 <li><strong>MAIR_EL1</strong> 内存权限 </li>
@@ -386,18 +325,62 @@
 <li>设置<strong>ttbr0_el1 ttbr1_el1</strong></li>
 </ol>
 <p>问题：使能MMU之后，多次进入串口中断会触发PC没有对齐的异常。后来检查发现内存映射没有做好，之前完整映射时一直有remap没有检查，只是少映射了数据段的长度，串口打印时会使用到没有映射地址的数据，导致异常。解决：检查映射后更改，不再触发。</p>
-<h4 id="2-映射kernel代码到内核空间"><a href="#2-映射kernel代码到内核空间" class="headerlink" title="2. 映射kernel代码到内核空间"></a>2. 映射kernel代码到内核空间</h4><p>uboot引导内核之后，内核一直运行在低地址，这个地方是操作系统预留给用户程序的空间，我们需要尽快将内核映射到<strong>内核空间(0xffff000000000000)<strong>去。操作MMU完成两个页表的映射，</strong>_pagetable0</strong>用于完成<strong>1：1映射(identical mapping)<strong>以保证在开启MMU之后的下一条指令仍然能够正常运行不触发page fault。</strong>_pagetable1</strong>用于映射内核代码的物理地址到内核空间，映射完成之后使用绝对跳转到高地址执行内核。</p>
+<h3 id="2-映射kernel代码到内核空间"><a href="#2-映射kernel代码到内核空间" class="headerlink" title="2. 映射kernel代码到内核空间"></a>2. 映射kernel代码到内核空间</h3><p>uboot引导内核之后，内核一直运行在低地址，这个地方是操作系统预留给用户程序的空间，我们需要尽快将内核映射到<strong>内核空间(0xffff000000000000)<strong>去。操作MMU完成两个页表的映射，</strong>_pagetable0</strong>用于完成<strong>1：1映射(identical mapping)<strong>以保证在开启MMU之后的下一条指令仍然能够正常运行不触发page fault。</strong>_pagetable1</strong>用于映射内核代码的物理地址到内核空间，映射完成之后使用绝对跳转到高地址执行内核。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">adr x0, before_kernel	/*完成映射并开启MMU*/</span><br><span class="line">blr x0</span><br><span class="line"></span><br><span class="line">ldr x0, =kernel_main	/*跳转到kernel_main链接地址去执行*/</span><br><span class="line">br x0</span><br></pre></td></tr></table></figure>
 
-
-
+<p><strong>问题：</strong>页表切换之后不能访问，但是如果在原来的页表上增加映射又可以继续执行，没有设置data尚不清楚机制，排查发现是忘记更换堆栈指针到高地址。最开始使用的SP空间一直在低地址，切换了低地址页表之后SP的空间不能访问。在完成内核映射到高地址之后就应该重新设置SP到高地址了。</p>
+<h3 id="3-配置页表"><a href="#3-配置页表" class="headerlink" title="3. 配置页表"></a>3. 配置页表</h3><p>和之前RISCV上完成的<strong>等比映射</strong>（虚拟地址&#x3D;物理地址）相比，在RK上我使用了<strong>直接映射</strong>（虚拟地址&#x3D;物理地址+固定偏移）的方式，这样需要对原有的<strong>map_page()<strong>函数改进。原因在于进程的</strong>页表基址</strong>和<strong>页表项中存储的地址</strong>都是<strong>物理地址</strong>，但是操作这些页表需要虚拟地址。</p>
 <h2 id="5-系统调用"><a href="#5-系统调用" class="headerlink" title="5. 系统调用"></a>5. 系统调用</h2><p>与<strong>RISCV</strong>不同的是，<strong>RISCV</strong>中<strong>ecall</strong>指令传递参数的方式是直接通过<strong>x0</strong>寄存器，<strong>Armv8</strong>中使用<strong>svc #imm</strong>直接将数字硬编码到指令中，参数的传递通过<strong>ESR</strong>寄存器完成，<strong>ESR寄存器在面对不同的异常类型时，字段的解码方式不同</strong>。</p>
 <p><img src="/home/songyj/pics/ESR.png" alt="ESR info"></p>
+<p>系统调用的具体参数就遵从<strong>armv8</strong>的<strong>call procedure ABI</strong>，x0到x7存放param，x8返回值。</p>
+<h2 id="6-User-Kernel-Transition-amp-Context-Switch"><a href="#6-User-Kernel-Transition-amp-Context-Switch" class="headerlink" title="6. User-Kernel Transition &amp; Context Switch"></a>6. User-Kernel Transition &amp; Context Switch</h2><h3 id="1-struct-context"><a href="#1-struct-context" class="headerlink" title="1. struct context"></a>1. struct context</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> reg[<span class="number">11</span>]; <span class="comment">/* x19~x28 x29(FP)*/</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> sp;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> lr;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在<strong>context</strong>结构体的定义中没有PC寄存器的值，如何返回到另一个进程之前运行的地方？<strong>swtch</strong>函数最后使用<strong>ret</strong>指令返回到<strong>lr</strong>中装载的地址，而<strong>lr</strong>中的地址正好是上一次进入<strong>swtch</strong>函数时装载的，所以<strong>ret</strong>之后刚好是<strong>swtch</strong>执行之后。</p>
+<h3 id="2-struct-trapframe"><a href="#2-struct-trapframe" class="headerlink" title="2. struct trapframe"></a>2. struct trapframe</h3><p><strong>trapframe</strong>是发生异常时的<strong>cpu</strong>状态快照，需要保存所有的寄存器。异常发生之后，在异常入口按照<strong>trapframe</strong>的结构将<strong>trapframe</strong>压栈或者存储在内存页中（xv6-riscv）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">trap_frame</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> general_reg[<span class="number">30</span>];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> lr;       <span class="comment">//x30</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> sp_el0;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> spsr_el1;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> elr_el1;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> esr_el1;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> trap_type;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-trapframe和context有什么区别？"><a href="#3-trapframe和context有什么区别？" class="headerlink" title="3. trapframe和context有什么区别？"></a>3. <strong>trapframe</strong>和<strong>context</strong>有什么区别？</h3><p>在<strong>xv6-riscv</strong>中<strong>trapframe</strong>是以一页的形式映射在用户空间的，每一个用户进程都有一页单独存放<strong>trapframe</strong>。<strong>trapframe</strong>顾名思义也就是在异常发生的那一刻对于<strong>cpu</strong>状态的保存，当异常处理完成之后，我们需要返回到<strong>cpu</strong>之前的状态继续执行被打断的程序。</p>
+<p><img src="/home/songyj/pics/xv6_user_space.png"></p>
+<p>参考xv6在用户层异常进入和退出的代码就很容易明白trapframe的含义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">/*uservec是用户空间中发生异常时的异常入口*/</span><br><span class="line">uservec:</span><br><span class="line">	csrw sscratch, a0</span><br><span class="line">  </span><br><span class="line">	li a0, 0x3fffffe000</span><br><span class="line">  </span><br><span class="line">    sd ra, 40(a0)</span><br><span class="line">    sd sp, 48(a0)</span><br><span class="line">    sd gp, 56(a0)</span><br><span class="line">    ...</span><br><span class="line">    sd t3, 256(a0)</span><br><span class="line">    sd t4, 264(a0)</span><br><span class="line">    sd t5, 272(a0)</span><br><span class="line">    sd t6, 280(a0)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">userret:</span><br><span class="line">    sfence.vma zero, zero	/*更换页表*/</span><br><span class="line">    csrw satp, a0</span><br><span class="line">    sfence.vma zero, zero</span><br><span class="line"></span><br><span class="line">    li a0, 0x3fffffe000		/*加载trapframe地址到a0*/</span><br><span class="line"></span><br><span class="line">    ld ra, 40(a0)			/*从trapframe中恢复寄存器的值*/</span><br><span class="line">    ld sp, 48(a0)</span><br><span class="line">    ld gp, 56(a0)</span><br><span class="line">    ld tp, 64(a0)</span><br><span class="line">	...</span><br><span class="line">	ld t5, 272(a0)</span><br><span class="line">    ld t6, 280(a0)</span><br><span class="line">  </span><br><span class="line">    ld a0, 112(a0)</span><br><span class="line">    sret					/*sret返回*/</span><br></pre></td></tr></table></figure>
+
+<p>为什么专门有这样一个结构用特殊的一页来存储或者说为什么不直接存储在<strong>stack</strong>中？</p>
+<p><strong>riscv</strong>在<strong>qemu virtborad</strong>的实现中只有一个<strong>SP</strong>寄存器，因此三个异常等级是共用这一个<strong>SP</strong>寄存器的，在user阶段的异常涉及到异常等级的上升下降，每个异常等级都会使用到不同的<strong>stack</strong>，也就是说会更换<strong>SP</strong>寄存器中的值。如果不涉及到异常等级的改变，例如在kernel的运行中出现异常，<strong>trapframe</strong>就是直接存储在<strong>stack</strong>当中的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">/*kernelvec是内核空间中发生异常时的异常入口*/</span><br><span class="line">kernelvec:    </span><br><span class="line">    addi sp, sp, -256		/*make room to save registers*/</span><br><span class="line">    </span><br><span class="line">    sd ra, 0(sp)			/*save the registers*/</span><br><span class="line">    sd sp, 8(sp)</span><br><span class="line">    sd gp, 16(sp)</span><br><span class="line">    sd tp, 24(sp)</span><br><span class="line">    sd t0, 32(sp)    </span><br><span class="line">    ...</span><br><span class="line">    call kerneltrap			/*trap handler in c*/</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    ld t4, 224(sp)			/*restore the registers*/</span><br><span class="line">    ld t5, 232(sp)</span><br><span class="line">    ld t6, 240(sp)</span><br><span class="line"></span><br><span class="line">    addi sp, sp, 256</span><br><span class="line">    sret        			/*return to whatever we were doing in the kernel*/</span><br></pre></td></tr></table></figure>
+
+<p>所以<strong>trapframe</strong>肯定是需要的，因为<strong>trapframe</strong>是用来恢复异常之前的<strong>CPU</strong>状态的，但是<strong>trapframe</strong>不一定要像<strong>RISCV</strong>当中一样存储在单独的一页中，他也有可能存储在<strong>stack</strong>中。</p>
+<p>在ARMv8中，每个异常等级都有自己的<strong>stack</strong>，因此我选择将<strong>trapframe</strong>直接存储在内核栈当中。</p>
+<p><strong>问题1：</strong>切换进程的定时器1s一次的时候，进程切换正常，但是提高频率之后trap，且有几率trap错位置（在el1却进入了el0的trap函数，甚至elr&#x3D;0x01）？排查发现trapframe栈帧有问题设置短了。</p>
+<p><strong>问题2：</strong>程序在内核和用户空间执行时定时器中断都有可能发生，在内核空间切换trap？内核的切换必须在第一次用户切换之后，不然会加载空的context，设置标志位暂时解决。</p>
+<h3 id="4-用户内核切换"><a href="#4-用户内核切换" class="headerlink" title="4. 用户内核切换"></a>4. 用户内核切换</h3><p>用户空间内核空间的切换实际上就是依赖异常的进入和退出完成的，用户空间和内核空间的切换主要出现在两个时候：</p>
+<ul>
+<li><strong>syscall</strong></li>
+<li><strong>interrupt</strong></li>
+</ul>
+<h3 id="5-上下文切换"><a href="#5-上下文切换" class="headerlink" title="5. 上下文切换"></a>5. 上下文切换</h3><p>上下文切换都发生在内核空间也是两个时候：</p>
+<ul>
+<li><strong>进程的内核部分切换上下文回到scheduler进程的状态</strong></li>
+<li><strong>scheduler进程切换上下文去到新进程的内核状态</strong></li>
+</ul>
+<h2 id="7-文件系统"><a href="#7-文件系统" class="headerlink" title="7. 文件系统"></a>7. 文件系统</h2><h3 id="1-硬件驱动"><a href="#1-硬件驱动" class="headerlink" title="1. 硬件驱动"></a>1. 硬件驱动</h3><h4 id="1-SDMMC"><a href="#1-SDMMC" class="headerlink" title="1. SDMMC"></a>1. SDMMC</h4><ul>
+<li><input disabled="" type="checkbox"> sdmmc驱动</li>
+</ul>
+<h4 id="2-SPI"><a href="#2-SPI" class="headerlink" title="2. SPI"></a>2. SPI</h4><p>SPI驱动一定要拉低片选才能通信</p>
+<p>问题：发送cmd0之后一直返回0xff？</p>
+<p>发送完cmd的6个byte之后不能马上进行读取操作，<strong>需要再发送一次或者多次0xff等待sd卡响应</strong>。sd卡每次发送命令之前最好先发送一个<strong>0xff</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 使用DMA</li>
+</ul>
 <h2 id="6-更多"><a href="#6-更多" class="headerlink" title="6. 更多"></a>6. 更多</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#使用find工具查找可能的文件</span></span><br><span class="line">find /home/user/documents -<span class="built_in">type</span> f -name <span class="string">&quot;*.txt&quot;</span></span><br></pre></td></tr></table></figure>
 
 
 
 <h2 id="7-参考"><a href="#7-参考" class="headerlink" title="7. 参考"></a>7. 参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/s-matyukevich/raspberry-pi-os">s-matyukevich&#x2F;rpios</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_30095023/article/details/131591790">sd驱动</a></p>
 
     
 
@@ -532,7 +515,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#rk%E7%B3%BB%E5%88%97%E8%A3%B8%E6%9C%BA"><span class="toc-number">1.</span> <span class="toc-text">rk系列裸机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%89%93%E5%8C%85%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">1.打包分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8uboot%E5%90%AF%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.1.1.</span> <span class="toc-text">使用uboot启动程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qemu-virt%E5%BC%80%E5%8F%91%E6%9D%BF%E5%B8%AE%E5%8A%A9%E9%AA%8C%E8%AF%81%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.2.</span> <span class="toc-text">qemu virt开发板帮助验证程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%87%E6%80%AA%E7%9A%84%E9%94%99%E8%AF%AF"><span class="toc-number">1.3.</span> <span class="toc-text">奇怪的错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.4.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-ARMv8"><span class="toc-number">1.5.</span> <span class="toc-text">3.1 ARMv8</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.5.1.</span> <span class="toc-text">寄存器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#armv8%E6%B1%87%E7%BC%96"><span class="toc-number">1.5.2.</span> <span class="toc-text">armv8汇编</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%A0%88%E6%93%8D%E4%BD%9C"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">1. 栈操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-adr-adrp-ldr"><span class="toc-number">1.5.2.2.</span> <span class="toc-text">2. adr adrp ldr</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%B7%B3%E8%BD%AC"><span class="toc-number">1.5.2.3.</span> <span class="toc-text">3. 跳转</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.5.3.</span> <span class="toc-text">异常处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-GIC-500-GIC-600"><span class="toc-number">1.6.</span> <span class="toc-text">2. GIC-500 GIC-600</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%AD%E6%96%AD%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.6.1.</span> <span class="toc-text">1. 中断类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-GIC%E7%BB%93%E6%9E%84"><span class="toc-number">1.6.2.</span> <span class="toc-text">2. GIC结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%9D%E5%A7%8B%E5%8C%96GIC"><span class="toc-number">1.6.3.</span> <span class="toc-text">3. 初始化GIC</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86"><span class="toc-number">1.7.</span> <span class="toc-text">3. 中断处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-PPI-%E5%AE%9A%E6%97%B6%E5%99%A8-SPI-UART"><span class="toc-number">1.7.1.</span> <span class="toc-text">1. PPI(定时器) SPI(UART)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-MMU"><span class="toc-number">1.8.</span> <span class="toc-text">4. MMU</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-MMU%E5%9F%BA%E6%9C%AC"><span class="toc-number">1.8.0.1.</span> <span class="toc-text">1. MMU基本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%98%A0%E5%B0%84kernel%E4%BB%A3%E7%A0%81%E5%88%B0%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4"><span class="toc-number">1.8.0.2.</span> <span class="toc-text">2. 映射kernel代码到内核空间</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="toc-number">1.9.</span> <span class="toc-text">5. 系统调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%9B%B4%E5%A4%9A"><span class="toc-number">1.10.</span> <span class="toc-text">6. 更多</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%8F%82%E8%80%83"><span class="toc-number">1.11.</span> <span class="toc-text">7. 参考</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#rk%E7%B3%BB%E5%88%97%E8%A3%B8%E6%9C%BA"><span class="toc-number">1.</span> <span class="toc-text">rk系列裸机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%89%93%E5%8C%85%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">1.打包分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8uboot%E5%90%AF%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.1.1.</span> <span class="toc-text">使用uboot启动程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qemu-virt%E5%BC%80%E5%8F%91%E6%9D%BF%E5%B8%AE%E5%8A%A9%E9%AA%8C%E8%AF%81%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.2.</span> <span class="toc-text">qemu virt开发板帮助验证程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%87%E6%80%AA%E7%9A%84%E9%94%99%E8%AF%AF"><span class="toc-number">1.3.</span> <span class="toc-text">奇怪的错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.4.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-ARMv8"><span class="toc-number">1.5.</span> <span class="toc-text">2. ARMv8</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SPECIAL-%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.5.1.</span> <span class="toc-text">SPECIAL 寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#SPSR-ELx-Saved-Process-Status-Register"><span class="toc-number">1.5.1.1.</span> <span class="toc-text">SPSR_ELx (Saved Process Status Register)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ELR-ELx-Exception-Link-Register"><span class="toc-number">1.5.1.2.</span> <span class="toc-text">ELR_ELx (Exception Link Register)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SP-ELx-Stack-pointer"><span class="toc-number">1.5.1.3.</span> <span class="toc-text">SP_ELx (Stack pointer)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#armv8%E6%B1%87%E7%BC%96"><span class="toc-number">1.5.2.</span> <span class="toc-text">armv8汇编</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%A0%88%E6%93%8D%E4%BD%9C"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">1. 栈操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-adr-adrp-ldr"><span class="toc-number">1.5.2.2.</span> <span class="toc-text">2. adr adrp ldr</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%B7%B3%E8%BD%AC"><span class="toc-number">1.5.2.3.</span> <span class="toc-text">3. 跳转</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.6.</span> <span class="toc-text">3. 异常处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BC%82%E5%B8%B8%E8%BF%94%E5%9B%9E"><span class="toc-number">1.6.1.</span> <span class="toc-text">1. 异常返回</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86"><span class="toc-number">1.6.2.</span> <span class="toc-text">2. 中断处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-PPI-%E5%AE%9A%E6%97%B6%E5%99%A8-SPI-UART"><span class="toc-number">1.6.2.1.</span> <span class="toc-text">1. PPI(定时器) SPI(UART)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-GIC-500-GIC-600"><span class="toc-number">1.7.</span> <span class="toc-text">2. GIC-500 GIC-600</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%AD%E6%96%AD%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.7.1.</span> <span class="toc-text">1. 中断类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-GIC%E7%BB%93%E6%9E%84"><span class="toc-number">1.7.2.</span> <span class="toc-text">2. GIC结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%9D%E5%A7%8B%E5%8C%96GIC"><span class="toc-number">1.7.3.</span> <span class="toc-text">3. 初始化GIC</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%E7%9A%84%E6%98%A0%E5%B0%84"><span class="toc-number">1.8.</span> <span class="toc-text">4. 内核空间用户空间的映射</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-MMU%E5%9F%BA%E6%9C%AC"><span class="toc-number">1.8.1.</span> <span class="toc-text">1. MMU基本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%98%A0%E5%B0%84kernel%E4%BB%A3%E7%A0%81%E5%88%B0%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4"><span class="toc-number">1.8.2.</span> <span class="toc-text">2. 映射kernel代码到内核空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%85%8D%E7%BD%AE%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.8.3.</span> <span class="toc-text">3. 配置页表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="toc-number">1.9.</span> <span class="toc-text">5. 系统调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-User-Kernel-Transition-amp-Context-Switch"><span class="toc-number">1.10.</span> <span class="toc-text">6. User-Kernel Transition &amp; Context Switch</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-struct-context"><span class="toc-number">1.10.1.</span> <span class="toc-text">1. struct context</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-struct-trapframe"><span class="toc-number">1.10.2.</span> <span class="toc-text">2. struct trapframe</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-trapframe%E5%92%8Ccontext%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">1.10.3.</span> <span class="toc-text">3. trapframe和context有什么区别？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E7%94%A8%E6%88%B7%E5%86%85%E6%A0%B8%E5%88%87%E6%8D%A2"><span class="toc-number">1.10.4.</span> <span class="toc-text">4. 用户内核切换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2"><span class="toc-number">1.10.5.</span> <span class="toc-text">5. 上下文切换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.11.</span> <span class="toc-text">7. 文件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%A1%AC%E4%BB%B6%E9%A9%B1%E5%8A%A8"><span class="toc-number">1.11.1.</span> <span class="toc-text">1. 硬件驱动</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-SDMMC"><span class="toc-number">1.11.1.1.</span> <span class="toc-text">1. SDMMC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-SPI"><span class="toc-number">1.11.1.2.</span> <span class="toc-text">2. SPI</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%9B%B4%E5%A4%9A"><span class="toc-number">1.12.</span> <span class="toc-text">6. 更多</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%8F%82%E8%80%83"><span class="toc-number">1.13.</span> <span class="toc-text">7. 参考</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
